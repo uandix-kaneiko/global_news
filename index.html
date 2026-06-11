@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>글로벌 데일리 브리핑 — KB Global</title>
+<style>
+  :root{
+    --gold:#FFBC00; --charcoal:#54504A; --ink:#1F1D1A; --paper:#F7F6F3;
+    --card:#FFFFFF; --line:#E6E3DD; --sub:#8A857C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:#E9E7E2;
+    font-family:'Pretendard','Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:480px; margin:0 auto; background:var(--paper); min-height:100vh; box-shadow:0 0 24px rgba(0,0,0,.08);}
+
+  /* 헤더 */
+  header{background:var(--charcoal); padding:18px 20px 16px;}
+  .brand{display:flex; align-items:baseline; gap:8px;}
+  .brand .logo{color:var(--gold); font-weight:900; font-size:13px; letter-spacing:.08em;}
+  .brand .issue{color:#B8B3AA; font-size:11px;}
+  header h1{margin:8px 0 2px; color:#fff; font-size:22px; font-weight:900; letter-spacing:-0.02em;}
+  header .date{color:#CFCBC2; font-size:12px; font-weight:600;}
+
+  /* Executive Summary */
+  .summary-box{margin:16px 20px 0; background:var(--ink); border-radius:8px; padding:14px 16px; border-top:3px solid var(--gold);}
+  .summary-box .label{color:var(--gold); font-size:11px; font-weight:800; letter-spacing:.1em; margin-bottom:6px;}
+  .summary-box p{color:#EFEDE8; font-size:13.5px; line-height:1.7;}
+
+  /* TOP 3 */
+  .top3{padding:18px 20px 4px;}
+  .top3 h2{font-size:13px; font-weight:900; letter-spacing:.04em; color:var(--charcoal); margin-bottom:10px;}
+  .top3-item{display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:11px 14px; margin-bottom:6px;}
+  .top3-item .num{font-size:18px; font-weight:900; color:var(--gold); line-height:1.2; font-variant-numeric:tabular-nums;}
+  .top3-meta{display:flex; gap:6px; align-items:center; margin-bottom:3px;}
+  .top3-meta .country{font-size:11px; font-weight:700; color:var(--sub);}
+  .top3-item .title{font-size:13.5px; font-weight:700; line-height:1.45;}
+
+  /* 배지 */
+  .cat-badge{font-size:11px; font-weight:700; border-radius:3px; padding:2px 8px; white-space:nowrap;}
+  .cat-경제{background:#EAF1F9; color:#2E5E9E;} .bar-경제{border-left-color:#2E5E9E;}
+  .cat-금융{background:#EBF4EE; color:#3E7C4F;} .bar-금융{border-left-color:#3E7C4F;}
+  .cat-디지털{background:#F1ECF7; color:#6B4E8C;} .bar-디지털{border-left-color:#6B4E8C;}
+  .cat-금융사고{background:#FBEDEA; color:#C0392B;} .bar-금융사고{border-left-color:#C0392B;}
+  .cat-ESG{background:#E9F4F1; color:#2E8B6E;} .bar-ESG{border-left-color:#2E8B6E;}
+  .tier{font-size:10px; font-weight:700; letter-spacing:.02em; border-radius:3px; padding:2px 6px; white-space:nowrap;}
+  .tier-0{background:var(--ink); color:var(--gold);}
+  .tier-1{background:#E6E3DD; color:var(--charcoal);}
+  .tier-2{background:#F1EFEA; color:var(--sub);}
+
+  /* 거점 탭 */
+  nav.tabs{position:sticky; top:0; background:var(--paper); z-index:10; padding:12px 0 10px; border-bottom:1px solid var(--line);}
+  .chip-row{display:flex; gap:6px; overflow-x:auto; padding:0 20px 6px; scrollbar-width:none;}
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip-row.subs{padding-top:4px; padding-bottom:0; align-items:center;}
+  .sub-label{flex-shrink:0; font-size:10px; font-weight:800; color:#A8841A; letter-spacing:.04em;}
+  .chip{flex-shrink:0; padding:7px 12px; border-radius:16px; border:1px solid var(--line); background:var(--card); color:var(--charcoal); font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all .15s; font-family:inherit;}
+  .chip.sub-chip{border-color:#E2C76B; background:#FFFBEE;}
+  .chip.sub-chip .dot{margin-left:4px; font-size:10px; color:#A8841A;}
+  .chip.active{border:1.5px solid var(--ink); background:var(--ink); color:var(--gold);}
+  .chip.active .dot{display:none;}
+  .chip:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* 거점 헤더 + 지표 */
+  .country-head{display:flex; align-items:center; gap:8px; padding:14px 20px 10px;}
+  .country-head .flag{font-size:18px;}
+  .country-head .name{font-size:16px; font-weight:900;}
+  .type-badge{font-size:10.5px; font-weight:800; color:var(--sub); background:#EFEDE8; border-radius:3px; padding:2px 7px;}
+  .type-badge.sub{color:#A8841A; background:#FFF4D6;}
+  .indicators{display:flex; gap:8px; padding:0 20px;}
+  .indicator{flex:1; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:10px;}
+  .indicator .lbl{font-size:10px; color:var(--sub); font-weight:600; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .indicator .val{font-size:15px; font-weight:800; letter-spacing:-0.01em;}
+  .indicator .delta{font-size:11px; font-weight:700; margin-top:2px;}
+  .up{color:#C0392B;} .down{color:#2E5E9E;} .flat{color:var(--sub);}
+
+  /* 뉴스 카드 */
+  .news{padding:14px 20px 8px;}
+  .card{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--charcoal); border-radius:6px; padding:14px 16px; margin-bottom:10px;}
+  .card .meta{display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap;}
+  .card .source{font-size:11px; color:var(--sub); margin-left:auto;}
+  .card h3{font-size:15px; font-weight:800; line-height:1.4; margin-bottom:6px;}
+  .card .body{font-size:13px; color:#44413B; line-height:1.65;}
+  .implication{margin-top:10px; padding:8px 10px; background:#FFF8E5; border:1px solid #F2E2AE; border-radius:4px; font-size:12.5px; line-height:1.55; color:#6B5500;}
+  .implication strong{font-weight:800;}
+  .src-link{display:inline-block; margin-top:10px; font-size:12px; font-weight:700; color:var(--charcoal); text-decoration:underline; text-underline-offset:3px; background:none; border:none; padding:0; cursor:pointer; font-family:inherit;}
+
+  /* 풋터 */
+  footer{padding:16px 20px 28px; border-top:1px solid var(--line); margin-top:8px;}
+  footer p{font-size:11px; color:var(--sub); line-height:1.7;}
+  footer .contact{margin-top:10px; font-size:11px; font-weight:700; color:var(--charcoal);}
+
+  @media (prefers-reduced-motion: reduce){ .chip{transition:none;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <span class="logo">✱ KB GLOBAL</span>
+      <span class="issue">제 128호</span>
+    </div>
+    <h1>글로벌 데일리 브리핑</h1>
+    <div class="date">2026. 06. 11 (목) · 10개 거점 + 자회사 2</div>
+  </header>
+
+  <div class="summary-box">
+    <div class="label">EXECUTIVE SUMMARY</div>
+    <p>BOE 기준금리 동결 속 9월 인하 시그널 강화. 미 SEC 스테이블코인 공시 기준 초안 발표. 베트남 SBV, 외국계 은행 신용한도 확대. 인도네시아 BI 금리 인하로 KBI은행 조달환경 개선 기대.</p>
+  </div>
+
+  <section class="top3">
+    <h2>오늘의 TOP 3</h2>
+    <div class="top3-item">
+      <span class="num">1</span>
+      <div>
+        <div class="top3-meta"><span>🇬🇧</span><span class="country">런던</span><span class="cat-badge cat-경제">경제</span></div>
+        <div class="title">BOE, 기준금리 4.25% 동결… 9월 인하 가능성 시사</div>
+      </div>
+    </div>
+    <div class="top3-item">
+      <span class="num">2</span>
+      <div>
+        <div class="top3-meta"><span>🇺🇸</span><span class="country">뉴욕</span><span class="cat-badge cat-디지털">디지털</span></div>
+        <div class="title">SEC, 스테이블코인 발행사 공시 기준 초안 공개</div>
+      </div>
+    </div>
+    <div class="top3-item">
+      <span class="num">3</span>
+      <div>
+        <div class="top3-meta"><span>🇮🇩</span><span class="country">인도네시아</span><span class="cat-badge cat-금융">금융</span></div>
+        <div class="title">BI 기준금리 25bp 인하 — KBI은행 조달비용 완화 요인</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <div class="chip-row" id="branchRow"></div>
+    <div class="chip-row subs">
+      <span class="sub-label">국외연결자회사</span>
+      <span id="subRow" style="display:flex; gap:6px;"></span>
+    </div>
+  </nav>
+
+  <div class="country-head" id="countryHead"></div>
+  <div class="indicators" id="indicators"></div>
+  <section class="news" id="newsList"></section>
+
+  <footer>
+    <p>본 브리핑은 AI 기반 글로벌 뉴스 플랫폼이 각국 중앙은행·금융당국(Tier 0) 및 주요 언론(Tier 1–2) 자료를 수집·요약해 자동 생성한 자료입니다. 수치와 기사는 목업용 샘플이며, 투자 판단의 근거로 사용할 수 없습니다.</p>
+  </footer>
+
+</div>
+
+<script>
+/* ※ 수치·기사는 목업용 샘플 (실데이터 연동 전) */
+const COUNTRIES = [
+  { name:"런던", flag:"🇬🇧", type:"지점",
+    indicators:[
+      {label:"기준금리(BOE)", value:"4.25%", delta:"동결", dir:0},
+      {label:"GBP/KRW", value:"1,842.6", delta:"+0.4%", dir:1},
+      {label:"FTSE 100", value:"8,412", delta:"-0.2%", dir:-1}],
+    news:[
+      {cat:"경제", tier:0, source:"Bank of England",
+       title:"BOE 통화정책위, 기준금리 4.25% 동결",
+       body:"MPC 위원 9명 중 7명 동결, 2명 인하 표결. 베일리 총재는 서비스 물가 둔화가 확인되면 점진적 인하 여력이 있다고 언급, 시장은 9월 25bp 인하를 78% 확률로 반영.",
+       implication:"GBP 조달비용 하반기 완화 전망 — 런던지점 자금운용 듀레이션 점검 필요"},
+      {cat:"금융사고", tier:1, source:"Financial Times",
+       title:"영국 은행권, APP 사기 의무환급 분쟁 35% 급증",
+       body:"PSR 의무환급제 시행 이후 환급 분쟁이 전분기 대비 35% 증가. 은행권의 사기탐지 시스템 투자 확대가 이어지는 중.",
+       implication:"현지 송금 서비스 FDS 기준 재점검 권고"}]},
+  { name:"뉴욕", flag:"🇺🇸", type:"지점",
+    indicators:[
+      {label:"기준금리(Fed)", value:"3.75~4.00%", delta:"동결", dir:0},
+      {label:"USD/KRW", value:"1,368.2", delta:"-0.3%", dir:-1},
+      {label:"美 10Y 국채", value:"4.12%", delta:"+3bp", dir:1}],
+    news:[
+      {cat:"디지털", tier:0, source:"SEC",
+       title:"SEC, 스테이블코인 발행사 공시 기준 초안 공개",
+       body:"준비자산 구성·상환 절차·감사 주기에 대한 분기 공시 의무화 초안 발표. 60일 의견수렴 후 연내 확정 예정으로, 은행계 발행사에는 완화 기준 적용 가능성.",
+       implication:"그룹 디지털자산 사업 추진 시 미국 기준의 글로벌 표준화 가능성 주시"},
+      {cat:"경제", tier:1, source:"WSJ",
+       title:"5월 CPI 2.6%… 디스인플레이션 흐름 지속",
+       body:"근원 CPI도 2.9%로 둔화되며 연준의 9월 인하 기대 유지. 다만 관세발 수입물가 상승이 하반기 변수로 지목.",
+       implication:null}]},
+  { name:"동경", flag:"🇯🇵", type:"지점",
+    indicators:[
+      {label:"기준금리(BOJ)", value:"0.75%", delta:"동결", dir:0},
+      {label:"JPY/KRW(100)", value:"934.5", delta:"+0.5%", dir:1},
+      {label:"Nikkei 225", value:"41,280", delta:"+0.8%", dir:1}],
+    news:[
+      {cat:"경제", tier:0, source:"日本銀行(BOJ)",
+       title:"BOJ, 국채 매입 축소 속도 유지… 추가 인상은 신중",
+       body:"우에다 총재는 임금-물가 선순환을 재확인하면서도 미 통상정책 불확실성을 이유로 추가 인상에 신중한 입장 유지. 시장은 10월 인상 가능성을 절반 수준으로 반영.",
+       implication:"엔화 조달 포지션 금리 리스크 점검 — 헤지 비율 재산정 검토"},
+      {cat:"디지털", tier:1, source:"닛케이(Nikkei)",
+       title:"일본 3대 은행, 공동 예금토큰 결제망 상용화 발표",
+       body:"MUFG·SMBC·미즈호가 기업간 결제용 예금토큰 공동 인프라를 하반기 상용화한다고 발표. 무역결제 분야 우선 적용.",
+       implication:null}]},
+  { name:"홍콩", flag:"🇭🇰", type:"지점",
+    indicators:[
+      {label:"기준금리(HKMA)", value:"4.25%", delta:"동결", dir:0},
+      {label:"HKD/KRW", value:"175.3", delta:"-0.2%", dir:-1},
+      {label:"항셍지수", value:"24,860", delta:"+1.2%", dir:1}],
+    news:[
+      {cat:"금융", tier:0, source:"HKMA",
+       title:"HKMA, 위안화 유동성 공급 한도 일 1,000억 위안으로 확대",
+       body:"역외 위안화 허브 강화를 위해 RMB 유동성 창구 한도를 두 배로 확대. 채권퉁(Bond Connect) 거래 증가에 대응.",
+       implication:"위안화 무역금융·채권 운용 여건 개선 — 홍콩지점 RMB 비즈니스 확대 기회"},
+      {cat:"금융사고", tier:1, source:"SCMP",
+       title:"홍콩 증권업계 딥페이크 화상회의 사기 경보",
+       body:"임원 사칭 딥페이크 화상회의를 통한 자금이체 사기가 잇따르자 SFC가 업계 전반에 검증 절차 강화를 권고.",
+       implication:"지점 자금이체 콜백 검증 절차 재점검 권고"}]},
+  { name:"싱가포르", flag:"🇸🇬", type:"지점",
+    indicators:[
+      {label:"3M SORA", value:"2.41%", delta:"-2bp", dir:-1},
+      {label:"SGD/KRW", value:"1,022.7", delta:"+0.1%", dir:1},
+      {label:"STI", value:"3,945", delta:"+0.3%", dir:1}],
+    news:[
+      {cat:"금융", tier:0, source:"MAS",
+       title:"MAS, 환율정책 밴드 기울기 유지… 완화 기조 지속",
+       body:"반기 통화정책에서 S$NEER 절상 기울기를 유지. 수출 둔화에도 근원물가가 안정 범위에 있다고 평가.",
+       implication:null},
+      {cat:"ESG", tier:0, source:"MAS",
+       title:"MAS, 전환금융(Transition Finance) 공시 가이드라인 확정",
+       body:"아시아 전환금융 분류체계 기반 공시 가이드라인을 확정하고 2027년부터 대형 금융기관에 단계 적용 예정.",
+       implication:"아시아 전환금융 표준 선점 — 그룹 ESG여신 기준과의 정합성 검토 필요"}]},
+  { name:"중국", flag:"🇨🇳", type:"법인",
+    indicators:[
+      {label:"LPR(1Y)", value:"2.90%", delta:"동결", dir:0},
+      {label:"CNY/KRW", value:"190.4", delta:"+0.1%", dir:1},
+      {label:"CSI 300", value:"3,892", delta:"+0.6%", dir:1}],
+    news:[
+      {cat:"금융", tier:0, source:"인민은행(PBoC)",
+       title:"PBoC, 지급준비율 25bp 인하 검토 시사",
+       body:"2분기 통화정책 보고서에서 적시 유동성 공급을 강조하며 지준율 추가 인하 여지 언급. 부동산 부문 신용 회복 부진이 배경.",
+       implication:null},
+      {cat:"디지털", tier:1, source:"Caixin",
+       title:"디지털위안(e-CNY) 국경간 결제 시범 확대",
+       body:"홍콩·태국에 이어 UAE와의 mBridge 실거래 규모가 월 20억 위안을 돌파. 무역결제 중심으로 활용처 확대 중.",
+       implication:"위안화 무역금융 고객 대상 결제 인프라 변화 모니터링 필요"}]},
+  { name:"베트남", flag:"🇻🇳", type:"지점",
+    indicators:[
+      {label:"기준금리(SBV)", value:"4.50%", delta:"동결", dir:0},
+      {label:"VND/KRW(100)", value:"5.37", delta:"0.0%", dir:0},
+      {label:"VN-Index", value:"1,412", delta:"+1.1%", dir:1}],
+    news:[
+      {cat:"금융", tier:0, source:"베트남중앙은행(SBV)",
+       title:"SBV, 외국계 은행 신용성장 한도 16%로 상향",
+       body:"외국계 은행의 연간 신용성장 한도를 14%에서 16%로 확대. 제조업·인프라 대출 수요 대응 목적으로 하반기 추가 상향 가능성도 언급.",
+       implication:"현지 여신 성장 목표 상향 검토 기회 — 리스크한도와 병행 점검"},
+      {cat:"ESG", tier:2, source:"VnExpress",
+       title:"베트남 정부, 녹색분류체계(Taxonomy) 초안 공개",
+       body:"녹색채권·녹색여신 인정 기준을 담은 국가 분류체계 초안을 공개하고 의견수렴 착수. 연내 시행 목표.",
+       implication:null}]},
+  { name:"인도", flag:"🇮🇳", type:"지점",
+    indicators:[
+      {label:"기준금리(RBI)", value:"5.25%", delta:"-25bp", dir:-1},
+      {label:"INR/KRW", value:"16.21", delta:"-0.1%", dir:-1},
+      {label:"Sensex", value:"84,150", delta:"+0.5%", dir:1}],
+    news:[
+      {cat:"경제", tier:0, source:"인도중앙은행(RBI)",
+       title:"RBI, 기준금리 25bp 인하… 성장 지원 기조 강화",
+       body:"물가가 목표 범위 하단에 근접하자 레포금리를 5.25%로 인하. 성장률 전망은 6.8%로 유지하며 추가 완화 여지를 열어둠.",
+       implication:"인도 진출 한국계 기업 설비투자 수요 확대 예상 — 기업금융 영업 기회"},
+      {cat:"디지털", tier:1, source:"Economic Times",
+       title:"UPI 국경간 결제, UAE·싱가포르 이어 일본 연동 추진",
+       body:"인도 즉시결제망 UPI의 해외 연동이 확대되며 월 거래액 신기록 경신. 외국계 은행의 참여 기준 완화도 논의 중.",
+       implication:null}]},
+  { name:"미얀마", flag:"🇲🇲", type:"법인",
+    indicators:[
+      {label:"기준금리(CBM)", value:"7.00%", delta:"동결", dir:0},
+      {label:"MMK/KRW(100)", value:"6.52", delta:"-0.3%", dir:-1},
+      {label:"공정환율(USD)", value:"2,100", delta:"고정", dir:0}],
+    news:[
+      {cat:"금융", tier:0, source:"미얀마중앙은행(CBM)",
+       title:"CBM, 외화 의무매각 비율 35%로 완화",
+       body:"수출기업의 외화 의무매각 비율을 50%에서 35%로 낮추며 외환시장 통제를 일부 완화. 시장환율과 공정환율 간 괴리는 여전히 큰 상황.",
+       implication:"현지법인 외화 유동성 관리 부담 일부 완화 — 환율 이원화 리스크는 지속"},
+      {cat:"경제", tier:2, source:"Myanmar Times",
+       title:"국경무역 재개 확대… 對중국 교역 회복세",
+       body:"무세(Muse) 국경무역소 통관이 정상화되며 對중국 수출입이 전년 대비 회복. 물류비 부담은 여전히 높은 수준.",
+       implication:null}]},
+  { name:"오클랜드", flag:"🇳🇿", type:"지점",
+    indicators:[
+      {label:"기준금리(RBNZ)", value:"3.00%", delta:"-25bp", dir:-1},
+      {label:"NZD/KRW", value:"818.4", delta:"+0.2%", dir:1},
+      {label:"NZX 50", value:"12,640", delta:"+0.4%", dir:1}],
+    news:[
+      {cat:"경제", tier:0, source:"뉴질랜드중앙은행(RBNZ)",
+       title:"RBNZ, 기준금리 3.00%로 인하… 완화 사이클 막바지",
+       body:"OCR을 25bp 인하하며 중립금리 수준에 근접했다고 평가. 추가 인하는 데이터에 따라 결정한다는 입장.",
+       implication:"NZD 조달금리 하락 — 현지 교민·기업 모기지 영업 환경 개선"},
+      {cat:"ESG", tier:1, source:"NZ Herald",
+       title:"뉴질랜드 기후공시 의무화 2년차… 은행권 이행률 점검",
+       body:"CRD 의무공시 2년차를 맞아 FMA가 금융기관 공시 품질 점검 결과를 발표. 스코프3 산정 미비가 공통 지적사항.",
+       implication:null}]},
+  { name:"인도네시아", flag:"🇮🇩", type:"자회사", entity:"KBI은행",
+    indicators:[
+      {label:"기준금리(BI)", value:"5.25%", delta:"-25bp", dir:-1},
+      {label:"IDR/KRW(100)", value:"8.42", delta:"+0.2%", dir:1},
+      {label:"자카르타종합", value:"7,580", delta:"+0.9%", dir:1}],
+    news:[
+      {cat:"금융", tier:0, source:"인도네시아중앙은행(BI)",
+       title:"BI, 기준금리 25bp 인하… 루피아 안정 속 성장 지원",
+       body:"BI Rate를 5.25%로 인하. 루피아 환율이 안정 범위를 유지하자 내수 회복 지원으로 무게중심 이동. 연내 1회 추가 인하 전망 우세.",
+       implication:"KBI은행 조달비용 완화 — NIM 개선 및 여신 확대 여건 조성"},
+      {cat:"금융", tier:0, source:"OJK",
+       title:"OJK, 은행 디지털 전환 로드맵 2단계 발표",
+       body:"코어뱅킹 클라우드 전환 기준과 제3자 리스크 관리 가이드라인을 포함한 2단계 로드맵 공개. 2027년까지 단계 적용.",
+       implication:"KBI 차세대 시스템 구축 일정과의 정합성 검토 필요"}]},
+  { name:"캄보디아", flag:"🇰🇭", type:"자회사", entity:"프라삭은행",
+    indicators:[
+      {label:"지준율(NBC)", value:"9.0%", delta:"동결", dir:0},
+      {label:"KHR/KRW(100)", value:"33.6", delta:"0.0%", dir:0},
+      {label:"달러화율", value:"약 80%", delta:"―", dir:0}],
+    news:[
+      {cat:"금융", tier:0, source:"캄보디아중앙은행(NBC)",
+       title:"NBC, 리엘화 대출 비중 규제 이행 점검 강화",
+       body:"전체 대출의 리엘화 비중 10% 의무 이행 점검을 강화하고 미이행 기관에 단계적 제재 예고. 탈달러화 정책 기조 지속.",
+       implication:"프라삭은행 리엘화 여신 포트폴리오 비중 점검 필요"},
+      {cat:"디지털", tier:1, source:"Khmer Times",
+       title:"바콩(Bakong) 결제망, 국경간 QR 결제 베트남 연동",
+       body:"NBC의 블록체인 기반 결제망 바콩이 베트남과 QR 상호연동을 개시. 태국·라오스에 이은 네 번째 연동국.",
+       implication:"프라삭 리테일 결제 서비스의 바콩 연계 확대 기회"}]}
+];
+
+const TIER_LABEL = {0:"Tier 0 · 당국", 1:"Tier 1 · 주요언론", 2:"Tier 2 · 현지매체"};
+let current = 0;
+
+function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+
+function renderTabs(){
+  const branchRow = document.getElementById("branchRow");
+  const subRow = document.getElementById("subRow");
+  branchRow.innerHTML = ""; subRow.innerHTML = "";
+  COUNTRIES.forEach((c, i) => {
+    const isSub = c.type === "자회사";
+    const btn = document.createElement("button");
+    btn.className = "chip" + (isSub ? " sub-chip" : "") + (i === current ? " active" : "");
+    btn.innerHTML = c.flag + " " + esc(c.name) + (isSub ? '<span class="dot">●</span>' : "");
+    btn.onclick = () => { current = i; render(); };
+    (isSub ? subRow : branchRow).appendChild(btn);
+  });
+}
+
+function renderCountry(){
+  const c = COUNTRIES[current];
+
+  const head = document.getElementById("countryHead");
+  head.innerHTML =
+    '<span class="flag">' + c.flag + '</span>' +
+    '<span class="name">' + esc(c.name) + '</span>' +
+    '<span class="type-badge' + (c.type === "자회사" ? " sub" : "") + '">' +
+      (c.entity ? "자회사 · " + esc(c.entity) : esc(c.type)) + '</span>';
+
+  const ind = document.getElementById("indicators");
+  ind.innerHTML = c.indicators.map(x => {
+    const cls = x.dir > 0 ? "up" : x.dir < 0 ? "down" : "flat";
+    const arrow = x.dir > 0 ? "▲" : x.dir < 0 ? "▼" : "―";
+    return '<div class="indicator">' +
+      '<div class="lbl">' + esc(x.label) + '</div>' +
+      '<div class="val">' + esc(x.value) + '</div>' +
+      '<div class="delta ' + cls + '">' + arrow + ' ' + esc(x.delta) + '</div></div>';
+  }).join("");
+
+  const list = document.getElementById("newsList");
+  list.innerHTML = c.news.map(n =>
+    '<article class="card bar-' + n.cat + '">' +
+      '<div class="meta">' +
+        '<span class="cat-badge cat-' + n.cat + '">' + n.cat + '</span>' +
+        '<span class="tier tier-' + n.tier + '">' + TIER_LABEL[n.tier] + '</span>' +
+        '<span class="source">' + esc(n.source) + '</span>' +
+      '</div>' +
+      '<h3>' + esc(n.title) + '</h3>' +
+      '<p class="body">' + esc(n.body) + '</p>' +
+      (n.implication ? '<div class="implication"><strong>시사점</strong> · ' + esc(n.implication) + '</div>' : "") +
+      '<button class="src-link" type="button">원문 보기 →</button>' +
+    '</article>'
+  ).join("");
+}
+
+function render(){ renderTabs(); renderCountry(); }
+render();
+</script>
+</body>
+</html>
